@@ -87,11 +87,6 @@ variable "accelerator" {
   description = "The accelerator type to use when running the VM"
 }
 
-variable "firmware" {
-  type = string
-  description = "The firmware file to be used by QEMU"
-}
-
 variable "sudo_version" {
   type = string
   description = "The version of the sudo package to install"
@@ -127,7 +122,6 @@ source "qemu" "qemu" {
   display = var.display
   accelerator = var.accelerator
   qemu_binary = "qemu-system-${var.architecture.qemu}"
-  // firmware = var.firmware
 
   boot_wait = "1m"
 

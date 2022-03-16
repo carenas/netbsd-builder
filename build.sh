@@ -2,11 +2,13 @@
 
 set -euxo pipefail
 
-OS_VERSION="$1"; shift
-ARCHITECTURE="$1"; shift
+OS_VERSION="${1-9.2}"
+ARCHITECTURE="${2-x86-64}"
+shift 2 || true
 
 # rm -rf packer_cache
 
+rm -rf output
 packer build \
   -var-file "var_files/common.pkrvars.hcl" \
   -var-file "var_files/$ARCHITECTURE.pkrvars.hcl" \

@@ -54,7 +54,7 @@ EOF
 }
 
 minimize_disk() {
-  for dir in $(mount | awk '{ print $3 }'); do
+  for dir in $(mount | awk '/^\// { print $3 }'); do
     dd if=/dev/zero of="$dir/EMPTY" bs=1048576 || :
     rm -f "$dir/EMPTY"
   done

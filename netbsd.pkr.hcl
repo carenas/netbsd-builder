@@ -87,16 +87,6 @@ variable "accelerator" {
   description = "The accelerator type to use when running the VM"
 }
 
-variable "sudo_version" {
-  type = string
-  description = "The version of the sudo package to install"
-}
-
-variable "rsync_version" {
-  type = string
-  description = "The version of the rsync package to install"
-}
-
 locals {
   iso_target_extension = "iso"
   iso_target_path = "packer_cache"
@@ -126,78 +116,78 @@ source "qemu" "qemu" {
   boot_wait = "1m"
 
   boot_command = [
-    "a<enter><wait5>", // Installation messages in English
-    "a<enter><wait5>", // Keyboard type: unchanged
+    "a<enter><wait>", // Installation messages in English
+    "a<enter><wait>", // Keyboard type: unchanged
 
-    "a<enter><wait5>", // Install NetBSD to hard disk
-    "b<enter><wait5>", // Yes
+    "a<enter><wait>", // Install NetBSD to hard disk
+    "b<enter><wait>", // Yes
 
-    "a<enter><wait5>", // Available disks: sd0
-    "a<enter><wait5>", // Guid Partition Table
-    "a<enter><wait5>", // This is the correct geometry
-    "b<enter><wait5>", // Use default partition sizes
-    "x<enter><wait5>", // Partition sizes ok
+    "a<enter><wait>", // Available disks: sd0
+    "a<enter><wait>", // Guid Partition Table
+    "a<enter><wait>", // This is the correct geometry
+    "b<enter><wait>", // Use default partition sizes
+    "x<enter><wait>", // Partition sizes ok
     "b<enter><wait10>", // Yes
 
     "a<enter><wait>", // Bootblocks selection: Use BIOS console
 
     "d<enter><wait>", // Custom installation
     // Distribution set:
-    "f<enter><wait5>", // Compiler tools
-    "x<enter><wait5>", // Install selected sets
+    "f<enter><wait>", // Compiler tools
+    "x<enter><wait>", // Install selected sets
 
     "a<enter><wait4m>", // Install from: install image media
 
-    "<enter><wait5>", // Hit enter to continue
+    "<enter><wait>", // Hit enter to continue
 
     // Configure the additional items as needed
 
     // Change root password
-    "d<enter><wait5>",
-    "a<enter><wait5>", // Yes
-    "${var.root_password}<enter><wait5>", // New password
-    "${var.root_password}<enter><wait5>", // New password
-    "${var.root_password}<enter><wait5>", // Retype new password
+    "d<enter><wait>",
+    "a<enter><wait>", // Yes
+    "${var.root_password}<enter><wait>", // New password
+    "${var.root_password}<enter><wait>", // New password
+    "${var.root_password}<enter><wait>", // Retype new password
 
     // Add a user
-    "o<enter><wait5>",
+    "o<enter><wait>",
     "${var.secondary_user_username}<enter><wait5>", // username
-    "a<enter><wait5>", // Add user to group wheel, Yes
-    "a<enter><wait5>", // User shell, sh
-    "${var.secondary_user_password}<enter><wait5>", // New password
-    "${var.secondary_user_password}<enter><wait5>", // New password
-    "${var.secondary_user_password}<enter><wait5>", // New password
+    "a<enter><wait>", // Add user to group wheel, Yes
+    "a<enter><wait>", // User shell, sh
+    "${var.secondary_user_password}<enter><wait>", // New password
+    "${var.secondary_user_password}<enter><wait>", // New password
+    "${var.secondary_user_password}<enter><wait>", // New password
 
-    "g<enter><wait5>", // Enable sshd
-    "h<enter><wait5>", // Enable ntpd
-    "i<enter><wait5>", // Run ntpdate at boot
+    "g<enter><wait>", // Enable sshd
+    "h<enter><wait>", // Enable ntpd
+    "i<enter><wait>", // Run ntpdate at boot
 
     // Configure network
-    "a<enter><wait5>",
-    "a<enter><wait5>", // first interface
-    "<enter><wait5>", // Network media type
+    "a<enter><wait>",
+    "a<enter><wait>", // first interface
+    "<enter><wait>", // Network media type
     "a<enter><wait20>", // Perform autoconfiguration, Yes
-    "<enter><wait5>", // Your DNS domain
-    "a<enter><wait5>", // Are they OK, Yes
-    "a<enter><wait5>", // Is the network information correct, Yes
+    "<enter><wait>", // Your DNS domain
+    "a<enter><wait>", // Are they OK, Yes
+    "a<enter><wait>", // Is the network information correct, Yes
 
     // Enable installation of binary packages
-    "e<enter><wait5>",
+    "e<enter><wait>",
     "x<enter><wait2m>",
     "<enter><wait5>", // Hit enter to continue
 
-    "x<enter><wait5>", // Finished configuring
-    "<enter><wait5>", // Hit enter to continue
+    "x<enter><wait>", // Finished configuring
+    "<enter><wait>", // Hit enter to continue
 
     // post install configuration
-    "e<enter><wait5>", // Utility menu
+    "e<enter><wait>", // Utility menu
     "a<enter><wait5>", // Run /bin/sh
 
     // shell
     "ftp -o /tmp/post_install.sh http://{{.HTTPIP}}:{{.HTTPPort}}/resources/post_install.sh<enter><wait10>",
     "sh /tmp/post_install.sh && exit<enter><wait5>",
 
-    "x<enter><wait5>", // Exit Utility menu
+    "x<enter><wait>", // Exit Utility menu
     "d<enter>", // Reboot the computer
   ]
 
@@ -209,13 +199,9 @@ source "qemu" "qemu" {
     ["-cpu", var.cpu_type],
     ["-boot", "strict=off"],
     ["-monitor", "none"],
-    ["-device", "virtio-scsi-pci"],
-    ["-device", "scsi-hd,drive=drive0,bootindex=0"],
-    ["-device", "scsi-cd,drive=drive1,bootindex=1"],
-    ["-drive", "if=none,file={{ .OutputDir }}/{{ .Name }},id=drive0,cache=writeback,discard=ignore,format=qcow2"],
-    ["-drive", "if=none,file=${local.iso_full_target_path},id=drive1,media=disk,format=raw,readonly=on"],
     ["-serial", "stdio"],
-    ["-netdev", "user,id=user.0,hostfwd=tcp::{{ .SSHHostPort }}-:22,ipv6=off"]
+    ["-netdev", "user,id=user.0,hostfwd=tcp::{{ .SSHHostPort }}-:22,ipv6=off"],
+    ["-device", "virtio-net-pci,netdev=user.0"]
   ]
 
   iso_checksum = var.checksum
@@ -227,7 +213,7 @@ source "qemu" "qemu" {
 
   http_directory = "."
   output_directory = "output"
-  shutdown_command = "/sbin/poweroff"
+  shutdown_command = "/sbin/halt -p"
   vm_name = local.vm_name
 }
 

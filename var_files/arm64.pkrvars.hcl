@@ -1,5 +1,6 @@
-machine_type = "virt"
-cpu_type = "cortex-a57"
+machine_type = "virt,highmem=off"
+accelerator = "hvf"
+cpu_type = "host"
 
 architecture = {
   name = "arm64"

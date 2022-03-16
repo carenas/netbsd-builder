@@ -213,7 +213,7 @@ source "qemu" "qemu" {
 
   http_directory = "."
   output_directory = "output"
-  shutdown_command = "/sbin/halt -p"
+  shutdown_command = "/sbin/shutdown -pz now"
   vm_name = local.vm_name
 }
 
